@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vision System - Windows GPU</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #eef0f4;
+      --surface: #fff;
+      --surface2: #f7f8fa;
+      --border: #e1e5eb;
+      --border2: #cdd3dc;
+      --text: #18202e;
+      --muted: #60708a;
+      --faint: #98a6ba;
+      --blue: #1d51d4;
+      --blue-lt: #edf2ff;
+      --blue-mid: #b8ccfe;
+      --green: #0f8a3c;
+      --green-lt: #edfaf3;
+      --green-mid: #a3e8c0;
+      --amber: #c06a00;
+      --amber-lt: #fff8ed;
+      --amber-mid: #fdd99a;
+      --violet: #6b28d4;
+      --violet-lt: #f3efff;
+      --violet-mid: #cbb8fd;
+      --red: #c81e1e;
+      --red-lt: #fff0f0;
+      --red-mid: #fbb5b5;
+      --sh0: 0 1px 2px rgba(0, 0, 0, .05), 0 1px 4px rgba(0, 0, 0, .04);
+      --sh: 0 3px 10px rgba(0, 0, 0, .07), 0 1px 3px rgba(0, 0, 0, .04);
+      --mono: 'DM Mono', monospace;
+      --sans: 'DM Sans', sans-serif;
+      --disp: 'Syne', sans-serif;
+      --r: 6px;
+      --r2: 4px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column
+    }
+
+    .topbar {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      height: 50px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--sh0);
+      z-index: 10;
+      gap: 12px
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-shrink: 0
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--blue);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(29, 81, 212, .35)
+    }
+
+    .logo-main {
+      font-family: var(--disp);
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text)
+    }
+
+    .logo-sub {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--faint)
+    }
+
+    .topbar-center {
+      display: flex;
+      gap: 3px
+    }
+
+    .step-tab {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 12px;
+      border-radius: var(--r2);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all .15s
+    }
+
+    .step-tab:hover {
+      background: var(--surface2);
+      border-color: var(--border)
+    }
+
+    .step-num {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--faint);
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: 3px;
+      padding: 1px 5px
+    }
+
+    .step-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted)
+    }
+
+    .step-tab.active {
+      background: var(--blue-lt);
+      border-color: var(--blue-mid)
+    }
+
+    .step-tab.active .step-num {
+      background: var(--blue);
+      color: #fff;
+      border-color: var(--blue)
+    }
+
+    .step-tab.active .step-label {
+      color: var(--blue)
+    }
+
+    .step-tab.done {
+      background: var(--green-lt);
+      border-color: var(--green-mid)
+    }
+
+    .step-tab.done .step-num {
+      background: var(--green);
+      color: #fff;
+      border-color: var(--green)
+    }
+
+    .step-tab.done .step-label {
+      color: var(--green)
+    }
+
+    .step-check {
+      font-size: 11px;
+      color: var(--green)
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0
+    }
+
+    .sys-time {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 3px 9px;
+      border-radius: var(--r2)
+    }
+
+    .status-pill {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 11px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .pill-idle {
+      background: #f0f2f5;
+      color: var(--muted)
+    }
+
+    .pill-idle .pill-dot {
+      background: var(--faint)
+    }
+
+    .pill-preview {
+      background: var(--green-lt);
+      color: var(--green);
+      border: 1px solid var(--green-mid)
+    }
+
+    .pill-preview .pill-dot {
+      background: var(--green);
+      animation: pulse 2s infinite
+    }
+
+    .pill-training {
+      background: var(--violet-lt);
+      color: var(--violet);
+      border: 1px solid var(--violet-mid)
+    }
+
+    .pill-training .pill-dot {
+      background: var(--violet);
+      animation: pulse 1.2s infinite
+    }
+
+    .pill-detecting {
+      background: var(--blue-lt);
+      color: var(--blue);
+      border: 1px solid var(--blue-mid)
+    }
+
+    .pill-detecting .pill-dot {
+      background: var(--blue);
+      animation: pulse .8s infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .45;
+        transform: scale(.75)
+      }
+    }
+
+    .layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 290px 1fr 350px;
+      overflow: hidden
+    }
+
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      overflow: hidden
+    }
+
+    .col-header {
+      flex-shrink: 0;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .col-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+    .col-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
+    .col-body::-webkit-scrollbar {
+      width: 3px
+    }
+
+    .col-body::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px
+    }
+
+    .warn-banner {
+      display: none;
+      background: var(--red-lt);
+      border: 1px solid var(--red-mid);
+      border-radius: var(--r);
+      padding: 9px 11px;
+      animation: wpulse 1.5s ease infinite
+    }
+
+    .warn-banner.show {
+      display: block
+    }
+
+    .warn-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--red)
+    }
+
+    .warn-sub {
+      font-size: 11px;
+      color: #b94040;
+      margin-top: 2px
+    }
+
+    @keyframes wpulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(200, 30, 30, 0)
+      }
+
+      50% {
+        box-shadow: 0 0 0 4px rgba(200, 30, 30, .12)
+      }
+    }
+
+    .beh-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px
+    }
+
+    .beh-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 9px 11px;
+      transition: border-color .2s, background .2s
+    }
+
+    .beh-card.hot {
+      background: var(--red-lt);
+      border-color: var(--red-mid)
+    }
+
+    .beh-card.hot .beh-val {
+      color: var(--red)
+    }
+
+    .beh-card.hot .bfill {
+      background: var(--red)
+    }
+
+    .beh-icon {
+      font-size: 15px;
+      margin-bottom: 3px
+    }
+
+    .beh-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 5px
+    }
+
+    .beh-val {
+      font-family: var(--disp);
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text);
+      margin-bottom: 7px
+    }
+
+    .btrack {
+      height: 3px;
+      background: var(--border2);
+      border-radius: 10px;
+      overflow: hidden
+    }
+
+    .bfill {
+      height: 100%;
+      border-radius: 10px;
+      background: var(--blue);
+      transition: width .4s ease;
+      width: 0%
+    }
+
+    .act-alerts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      min-height: 18px
+    }
+
+    .abadge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 10px;
+      background: var(--red-lt);
+      color: var(--red);
+      border: 1px solid var(--red-mid)
+    }
+
+    .slbl {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .7px;
+      text-transform: uppercase;
+      color: var(--faint);
+      padding: 3px 0 1px
+    }
+
+    .alog {
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .aentry {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      padding: 5px 9px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      animation: slin .25s ease
+    }
+
+    @keyframes slin {
+      from {
+        opacity: 0;
+        transform: translateX(-6px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0)
+      }
+    }
+
+    .atime {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--faint);
+      flex-shrink: 0
+    }
+
+    .aperson {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--blue);
+      flex-shrink: 0
+    }
+
+    .amsg {
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .acnt {
+      margin-left: auto;
+      font-family: var(--mono);
+      font-size: 10px;
+      background: var(--red-lt);
+      color: var(--red);
+      border: 1px solid var(--red-mid);
+      border-radius: 10px;
+      padding: 1px 6px;
+      flex-shrink: 0
+    }
+
+    .aempty {
+      font-size: 11px;
+      color: var(--faint);
+      text-align: center;
+      padding: 14px 0;
+      font-style: italic
+    }
+
+    .arepeat {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--blue-lt);
+      color: var(--blue);
+      font-size: 10px;
+      font-weight: 600;
+      padding: 0 5px;
+      border-radius: 8px;
+      margin-left: 6px;
+      border: 1px solid var(--blue-mid);
+      height: 16px;
+    }
+
+    .center-col {
+      display: flex;
+      flex-direction: column;
+      background: var(--bg);
+      overflow: hidden;
+      padding: 10px;
+      gap: 8px
+    }
+
+    .cam-panel {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: var(--sh);
+      display: flex;
+      flex-direction: column;
+      min-height: 0
+    }
+
+    .cam-ph {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 13px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2)
+    }
+
+    .cam-wrap {
+      flex: 1;
+      position: relative;
+      background: #0d1220;
+      overflow: hidden;
+      min-height: 0
+    }
+
+    #cam {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none
+    }
+
+    .cam-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      background: linear-gradient(145deg, #0d1220, #172038)
+    }
+
+    .cam-placeholder-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(255, 255, 255, .08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px
+    }
+
+    .cam-placeholder p {
+      font-size: 11px;
+      letter-spacing: .7px;
+      color: rgba(255, 255, 255, .2);
+      text-transform: uppercase
+    }
+
+    .cam-corner {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-color: rgba(29, 81, 212, .55);
+      border-style: solid
+    }
+
+    .cam-corner.tl {
+      top: 8px;
+      left: 8px;
+      border-width: 2px 0 0 2px;
+      border-radius: 2px 0 0 0
+    }
+
+    .cam-corner.tr {
+      top: 8px;
+      right: 8px;
+      border-width: 2px 2px 0 0;
+      border-radius: 0 2px 0 0
+    }
+
+    .cam-corner.bl {
+      bottom: 8px;
+      left: 8px;
+      border-width: 0 0 2px 2px;
+      border-radius: 0 0 0 2px
+    }
+
+    .cam-corner.br {
+      bottom: 8px;
+      right: 8px;
+      border-width: 0 2px 2px 0;
+      border-radius: 0 0 2px 0
+    }
+
+    .cam-rec {
+      position: absolute;
+      top: 9px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: none;
+      align-items: center;
+      gap: 5px;
+      background: rgba(13, 18, 32, .82);
+      backdrop-filter: blur(6px);
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(200, 30, 30, .4);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      color: #fca5a5;
+      text-transform: uppercase
+    }
+
+    .cam-rec.show {
+      display: flex
+    }
+
+    .rec-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--red);
+      animation: pulse .8s infinite
+    }
+
+    .stats-row {
+      flex-shrink: 0;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 9px 12px;
+      box-shadow: var(--sh0)
+    }
+
+    .stat-lbl {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 3px
+    }
+
+    .stat-val {
+      font-family: var(--disp);
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1;
+      color: var(--text)
+    }
+
+    .burst-bar {
+      flex-shrink: 0;
+      height: 3px;
+      background: var(--border);
+      border-radius: 10px;
+      overflow: hidden
+    }
+
+    .burst-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--blue), #5c87f5);
+      border-radius: 10px;
+      transition: width .3s ease;
+      width: 0%
+    }
+
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--border);
+      background: var(--surface);
+      overflow: hidden
+    }
+
+    .right-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 9px
+    }
+
+    .right-body::-webkit-scrollbar {
+      width: 3px
+    }
+
+    .right-body::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px
+    }
+
+    .ctrl-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      overflow: hidden;
+      box-shadow: var(--sh0)
+    }
+
+    .ctrl-card-hd {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2)
+    }
+
+    .ctrl-card-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+    .ctrl-card-body {
+      padding: 12px
+    }
+
+    .ctrl-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      align-items: flex-end
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .field label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+      color: var(--muted)
+    }
+
+    .field input {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 6px 9px;
+      border-radius: var(--r2);
+      width: 75px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s
+    }
+
+    .field input[type=text] {
+      width: 130px
+    }
+
+    .field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(29, 81, 212, .1);
+      background: var(--surface)
+    }
+
+    .btn {
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 13px;
+      border: 1px solid transparent;
+      border-radius: var(--r2);
+      cursor: pointer;
+      transition: all .13s ease;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .btn:disabled {
+      opacity: .38;
+      cursor: not-allowed
+    }
+
+    .btn:active:not(:disabled) {
+      transform: scale(.97)
+    }
+
+    .btn-preview {
+      background: var(--green);
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(15, 138, 60, .28)
+    }
+
+    .btn-preview:hover:not(:disabled) {
+      background: #0a7332
+    }
+
+    .btn-stop {
+      background: var(--surface2);
+      color: var(--red);
+      border-color: var(--red-mid)
+    }
+
+    .btn-stop:hover:not(:disabled) {
+      background: var(--red-lt);
+      border-color: var(--red)
+    }
+
+    .btn-train {
+      background: var(--violet);
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(107, 40, 212, .28)
+    }
+
+    .btn-train:hover:not(:disabled) {
+      background: #5820b0
+    }
+
+    .btn-detect {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 1px 3px rgba(29, 81, 212, .28)
+    }
+
+    .btn-detect:hover:not(:disabled) {
+      background: #153ea8
+    }
+
+    .btn-export {
+      background: var(--surface2);
+      color: var(--amber);
+      border-color: var(--amber-mid)
+    }
+
+    .btn-export:hover:not(:disabled) {
+      background: var(--amber-lt);
+      border-color: var(--amber)
+    }
+
+    .btn-sm {
+      font-size: 11px;
+      padding: 5px 10px;
+      background: var(--surface2);
+      color: var(--muted);
+      border-color: var(--border2)
+    }
+
+    .btn-sm:hover:not(:disabled) {
+      background: var(--red-lt);
+      color: var(--red);
+      border-color: var(--red-mid)
+    }
+
+    .hint-line {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--blue);
+      margin-top: 6px;
+      padding: 5px 8px;
+      background: var(--blue-lt);
+      border-radius: var(--r2);
+      border-left: 2px solid var(--blue)
+    }
+
+    .hdiv {
+      height: 1px;
+      background: var(--border);
+      margin: 10px 0
+    }
+
+    .prog-block {
+      display: none;
+      margin-top: 10px
+    }
+
+    .prog-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 5px
+    }
+
+    .prog-label span {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .3px;
+      text-transform: uppercase
+    }
+
+    .prog-pl {
+      color: var(--muted)
+    }
+
+    .prog-pr {
+      color: var(--violet)
+    }
+
+    .prog-track {
+      height: 5px;
+      background: var(--violet-lt);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--violet-mid)
+    }
+
+    .prog-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--violet), #a374fb);
+      border-radius: 10px;
+      transition: width .3s ease;
+      width: 0%
+    }
+
+    #train-status {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--violet);
+      margin-top: 7px;
+      word-break: break-word;
+      padding: 5px 8px;
+      background: var(--violet-lt);
+      border-radius: var(--r2);
+      display: none
+    }
+
+    #train-status:not(:empty) {
+      display: block
+    }
+
+    #train-persons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+      min-height: 22px
+    }
+
+    .p-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px 3px 7px;
+      background: var(--violet-lt);
+      border: 1px solid var(--violet-mid);
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--violet)
+    }
+
+    .p-chip-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--violet-mid);
+      font-size: 13px;
+      line-height: 1;
+      padding: 0;
+      transition: color .15s;
+      display: flex;
+      align-items: center
+    }
+
+    .p-chip-del:hover {
+      color: var(--red)
+    }
+
+    .mbadge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .3px;
+      padding: 3px 8px;
+      border-radius: 20px
+    }
+
+    .badge-ready {
+      background: var(--green-lt);
+      color: var(--green);
+      border: 1px solid var(--green-mid)
+    }
+
+    .badge-notready {
+      background: var(--amber-lt);
+      color: var(--amber);
+      border: 1px solid var(--amber-mid)
+    }
+
+    #det-alert {
+      display: none;
+      background: var(--blue-lt);
+      border: 1px solid var(--blue-mid);
+      border-radius: var(--r);
+      padding: 9px 12px;
+      margin-bottom: 10px
+    }
+
+    .det-top {
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--blue)
+    }
+
+    .det-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px
+    }
+
+    .pipeline-strip {
+      font-size: 10px;
+      color: var(--muted);
+      padding: 6px 9px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--r2);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 8px;
+      font-family: var(--mono)
+    }
+
+    .ps-row {
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .ps-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">&#128247;</div>
+      <div>
+        <div class="logo-main">Vision System</div>
+        <div class="logo-sub">RTX GPU &middot; YOLOv8-L &middot; InsightFace &middot; CUDA</div>
+      </div>
+    </div>
+    <div class="topbar-center">
+      <div class="step-tab active" id="step1" onclick="setStep(1)">
+        <span class="step-num">01</span><span class="step-label">Preview</span>
+      </div>
+      <div class="step-tab" id="step2" onclick="setStep(2)">
+        <span class="step-num">02</span><span class="step-label">Train</span>
+        <span class="step-check" id="step2-check"></span>
+      </div>
+      <div class="step-tab" id="step3" onclick="setStep(3)">
+        <span class="step-num">03</span><span class="step-label">Detect</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      {{POSE_BADGE}}
+      <span class="sys-time" id="sys-time">--:--:--</span>
+      <span class="status-pill pill-idle" id="status-pill">
+        <span class="pill-dot"></span><span id="pill-text">Idle</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="layout">
+
+    <!-- LEFT: Behavior Monitor -->
+    <div class="left-col">
+      <div class="col-header">
+        <span class="col-title">Behavior Monitor</span>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--faint)" id="person-count">0 persons</span>
+          <button class="btn btn-sm" onclick="clearBehavior()" title="Clear behavior counters and logs"
+            style="padding: 2px 6px;">&#10148; Clear</button>
+        </div>
+      </div>
+      <div class="col-body">
+        <div class="warn-banner" id="warn-banner">
+          <div class="warn-title">&#9888; Suspicious Activity</div>
+          <div class="warn-sub" id="warn-sub">-</div>
+        </div>
+        <div class="slbl">Detection Counters</div>
+        <div class="beh-grid">
+          <div class="beh-card" id="bc-turn">
+            <div class="beh-icon">&#8596;</div>
+            <div class="beh-label">Head Turns</div>
+            <div class="beh-val" id="cnt-turn">0</div>
+            <div class="btrack">
+              <div class="bfill" id="bar-turn"></div>
+            </div>
+          </div>
+          <div class="beh-card" id="bc-peek">
+            <div class="beh-icon">&#128071;</div>
+            <div class="beh-label">Peeking Down</div>
+            <div class="beh-val" id="cnt-peek">0</div>
+            <div class="btrack">
+              <div class="bfill" id="bar-peek"></div>
+            </div>
+          </div>
+          <div class="beh-card" id="bc-away">
+            <div class="beh-icon">&#128064;</div>
+            <div class="beh-label">Looking Away</div>
+            <div class="beh-val" id="cnt-away">0</div>
+            <div class="btrack">
+              <div class="bfill" id="bar-away"></div>
+            </div>
+          </div>
+          <div class="beh-card" id="bc-hand">
+            <div class="beh-icon">&#128400;</div>
+            <div class="beh-label">Hand Signals</div>
+            <div class="beh-val" id="cnt-hand">0</div>
+            <div class="btrack">
+              <div class="bfill" id="bar-hand"></div>
+            </div>
+          </div>
+        </div>
+        <div class="slbl">Active Right Now</div>
+        <div class="act-alerts" id="act-alerts">
+          <span style="font-size:11px;color:var(--faint);font-style:italic">None</span>
+        </div>
+        <div class="slbl">Live Objects &amp; People</div>
+        <div class="act-alerts" id="act-objects">
+          <span style="font-size:11px;color:var(--faint);font-style:italic">None</span>
+        </div>
+        <div class="slbl">Alert Log</div>
+        <div class="alog" id="alog">
+          <div class="aempty">No alerts yet</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: Camera Feed -->
+    <div class="center-col">
+      <div class="cam-panel">
+        <div class="cam-ph">
+          <span
+            style="font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted)">Camera
+            Feed</span>
+          <span id="fps-label" style="font-family:var(--mono);font-size:10px;color:var(--faint);font-weight:500">Cam 0.0
+            · AI 0.0</span>
+        </div>
+        <div class="cam-wrap">
+          <img id="cam" alt="feed">
+          <div class="cam-placeholder" id="cam-ph">
+            <div class="cam-placeholder-icon">&#128247;</div>
+            <p>No signal &mdash; start preview</p>
+          </div>
+          <div class="cam-corner tl"></div>
+          <div class="cam-corner tr"></div>
+          <div class="cam-corner bl"></div>
+          <div class="cam-corner br"></div>
+          <div class="cam-rec" id="cam-rec">
+            <div class="rec-dot"></div>Capturing
+          </div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-lbl">Captured</div>
+          <div class="stat-val" id="st-burst" style="color:var(--blue)">0/10</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Total Saved</div>
+          <div class="stat-val" id="st-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Interval</div>
+          <div class="stat-val" id="st-interval" style="color:var(--amber)">-</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Trained</div>
+          <div class="stat-val" id="st-faces" style="color:var(--violet)">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-lbl">Cam / AI</div>
+          <div class="stat-val"
+            style="color:var(--green); font-size: 14px; display: flex; align-items: baseline; gap: 4px;">
+            <span id="st-fps">0.0</span><span style="font-size: 10px; opacity: 0.6">/</span><span id="st-ifps"
+              style="opacity: 0.8">0.0</span>
+          </div>
+        </div>
+      </div>
+      <div class="burst-bar">
+        <div class="burst-fill" id="burst-fill"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Controls -->
+    <div class="right-col">
+      <div class="col-header"><span class="col-title">Controls</span></div>
+      <div class="right-body">
+
+        <div class="ctrl-card">
+          <div class="ctrl-card-hd"><span class="ctrl-card-title">01 - Camera</span></div>
+          <div class="ctrl-card-body">
+            <div class="ctrl-row">
+              <button class="btn btn-preview" onclick="startPreview()">&#9654; Start Preview</button>
+              <button class="btn btn-stop" onclick="stopStream()">&#9632; Stop</button>
+            </div>
+            <div class="pipeline-strip">
+              <div class="ps-row"><span class="ps-dot" style="background:var(--green)"></span>Preview/Train: YOLOv8-L
+                Pose (GPU CUDA)</div>
+              <div class="ps-row"><span class="ps-dot" style="background:var(--blue)"></span>Detection: YOLOv8-L +
+                InsightFace (CUDA)</div>
+              <div class="ps-row"><span class="ps-dot" style="background:var(--amber)"></span>Behavior: All 5 checks on
+                every frame</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ctrl-card">
+          <div class="ctrl-card-hd">
+            <span class="ctrl-card-title">02 - Face Training</span>
+            <span class="mbadge badge-notready" id="model-badge">Not Trained</span>
+          </div>
+          <div class="ctrl-card-body">
+            <div class="ctrl-row">
+              <div class="field"><label>Name</label><input type="text" id="train_name" placeholder="e.g. Saras"
+                  onkeydown="if(event.key==='Enter') startTraining()"></div>
+              <div class="field"><label>Images</label><input type="number" id="train_count" value="15" min="5" max="50">
+              </div>
+            </div>
+            <div class="ctrl-row" style="margin-top:9px">
+              <button class="btn btn-train" id="btn-train" onclick="startTraining()">&#9672; Capture &amp;
+                Train</button>
+              <button class="btn btn-sm" onclick="clearAllFaces()">&#10005; Clear All</button>
+            </div>
+            <div class="prog-block" id="progress-wrap">
+              <div class="prog-label"><span class="prog-pl">Training Progress</span><span class="prog-pr"
+                  id="prog-pct">0%</span></div>
+              <div class="prog-track">
+                <div class="prog-fill" id="progress-fill"></div>
+              </div>
+              <div id="train-status"></div>
+
+            </div>
+            <div id="train-persons"></div>
+          </div>
+        </div>
+
+        <div class="ctrl-card">
+          <div class="ctrl-card-hd"><span class="ctrl-card-title">03 - Detection</span></div>
+          <div class="ctrl-card-body">
+            <div id="det-alert">
+              <div class="det-top" id="det-alert-text">-</div>
+              <div class="det-sub" id="det-alert-sub">Initialising...</div>
+            </div>
+            <input type="hidden" id="duration" value="5">
+            <input type="hidden" id="num_images" value="0">
+            <div class="ctrl-row">
+              <button class="btn btn-detect" onclick="startDetect()">&#9685; Start Detection</button>
+              <button class="btn btn-stop" onclick="stopDetect()">&#9632; Stop</button>
+              <button class="btn btn-export" onclick="exportData()">&#8595; Export</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const THRESH = { turn: 5, peek: 3, away: 5, hand: 5 };
+    let prevBurst = 0, trainTarget = 15, burstTarget = 10;
+    let detStartTime = 0, detDurationGoal = 0, curMode = 'idle';
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+      return m + ":" + s.toString().padStart(2, '0');
+    }
+
+    setInterval(() => {
+      const el = document.getElementById('sys-time');
+      el.textContent = new Date().toLocaleTimeString();
+      el.style.color = 'var(--muted)';
+      el.style.fontWeight = '400';
+    }, 500);
+
+    function updateHint() {
+      const d = parseFloat(document.getElementById('duration').value) || 5;
+      const n = parseInt(document.getElementById('num_images').value);
+      if (n === 0) {
+        document.getElementById('st-interval').textContent = '-';
+      } else {
+        const i = (d / n).toFixed(2);
+        document.getElementById('st-interval').textContent = i + 's';
+      }
+    }
+    updateHint();
+
+    function setStep(n) {
+      for (let i = 1; i <= 3; i++)
+        document.getElementById('step' + i).className = 'step-tab' + (i < n ? ' done' : i === n ? ' active' : '');
+    }
+    function setPill(mode) {
+      curMode = mode;
+      const el = document.getElementById('status-pill'), tx = document.getElementById('pill-text');
+      const m = { idle: ['Idle', 'pill-idle'], preview: ['Live', 'pill-preview'], training: ['Training', 'pill-training'], detecting: ['Detecting', 'pill-detecting'] };
+      const [l, c] = m[mode] || ['Idle', 'pill-idle'];
+      tx.textContent = l; el.className = 'status-pill ' + c;
+    }
+    function showStream() {
+      document.getElementById('cam').src = '/stream?t=' + Date.now();
+      document.getElementById('cam').style.display = 'block';
+      document.getElementById('cam-ph').style.display = 'none';
+    }
+    function hideStream() {
+      document.getElementById('cam').style.display = 'none';
+      document.getElementById('cam-ph').style.display = 'flex';
+    }
+    function startPreview() { fetch('/start_preview', { method: 'POST' }); showStream(); setStep(1); }
+    function startTraining() {
+      const name = document.getElementById('train_name').value.trim();
+      const n = parseInt(document.getElementById('train_count').value) || 15;
+      if (!name) { alert('Enter a person name!'); return; }
+      trainTarget = n;
+      document.getElementById('progress-wrap').style.display = 'block';
+      document.getElementById('progress-fill').style.width = '0%';
+      document.getElementById('prog-pct').textContent = '0%';
+      document.getElementById('train-status').textContent = `Starting capture for "${name}"...`;
+      document.getElementById('btn-train').disabled = true;
+      setStep(2);
+      fetch('/start_training', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, num_images: n }) });
+      showStream();
+    }
+    function clearAllFaces() {
+      if (!confirm('Delete ALL trained face data?')) return;
+      fetch('/clear_faces', { method: 'POST' }).then(() => {
+        refreshPersonList(); setBadge(false);
+        document.getElementById('st-faces').textContent = '0';
+        document.getElementById('step2-check').textContent = '';
+      });
+    }
+    function setBadge(ready) {
+      const el = document.getElementById('model-badge');
+      if (ready) { el.textContent = 'Trained \u2713'; el.className = 'mbadge badge-ready'; document.getElementById('step2-check').textContent = '\u2713'; }
+      else { el.textContent = 'Not Trained'; el.className = 'mbadge badge-notready'; document.getElementById('step2-check').textContent = ''; }
+    }
+    function refreshPersonList() {
+      fetch('/faces').then(r => r.json()).then(d => {
+        const el = document.getElementById('train-persons');
+        if (!d.faces || !d.faces.length) { el.innerHTML = '<span style="font-size:11px;color:var(--faint)">No trained persons yet</span>'; return; }
+        el.innerHTML = d.faces.map(f => `<span class="p-chip">&#128100; ${f.name}<button class="p-chip-del" onclick="deletePerson('${f.name}')">\u2715</button></span>`).join('');
+      });
+    }
+    refreshPersonList();
+    function deletePerson(name) {
+      fetch('/delete_person', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) }).then(() => refreshPersonList());
+    }
+    function startDetect() {
+      const d = parseFloat(document.getElementById('duration').value) || 5;
+      let n = parseInt(document.getElementById('num_images').value);
+      if (isNaN(n)) n = 0;
+      burstTarget = n;
+      document.getElementById('det-alert').style.display = 'block';
+      document.getElementById('det-alert-text').textContent = `Detection running`;
+      document.getElementById('det-alert-sub').textContent = 'Monitoring...';
+      document.getElementById('burst-fill').style.width = '0%';
+      document.getElementById('cam-rec').classList.add('show');
+      detStartTime = Date.now(); detDurationGoal = d;
+      prevBurst = 0; setStep(3);
+      fetch('/start_detection', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ duration: d, num_images: n }) });
+      showStream();
+    }
+    function stopDetect() {
+      fetch('/stop_detection', { method: 'POST' }).then(() => {
+        document.getElementById('cam-rec').classList.remove('show');
+        document.getElementById('det-alert').style.display = 'none';
+      });
+    }
+    function stopStream() {
+      fetch('/stop', { method: 'POST' }); hideStream();
+      document.getElementById('det-alert').style.display = 'none';
+      document.getElementById('cam-rec').classList.remove('show');
+    }
+    function clearBehavior() {
+      if (!confirm('Clear all behavior counters and alert logs?')) return;
+      fetch('/clear_behavior', { method: 'POST' }).then(r => r.json()).then(d => {
+        if (d.ok) {
+          document.getElementById('cnt-turn').textContent = '0';
+          document.getElementById('cnt-peek').textContent = '0';
+          document.getElementById('cnt-away').textContent = '0';
+          document.getElementById('cnt-hand').textContent = '0';
+          document.getElementById('bar-turn').style.width = '0%';
+          document.getElementById('bar-peek').style.width = '0%';
+          document.getElementById('bar-away').style.width = '0%';
+          document.getElementById('bar-hand').style.width = '0%';
+          document.getElementById('alog').innerHTML = '<div class="aempty">No alerts yet</div>';
+          document.getElementById('act-alerts').innerHTML = '<span style="font-size:11px;color:var(--faint);font-style:italic">None</span>';
+          document.getElementById('warn-banner').classList.remove('show');
+        }
+      });
+    }
+    function exportData() { window.open('/export', '_blank'); }
+
+    function updateBehavior(b) {
+      const t = b.max_turns || 0, p = b.max_peeks || 0, a = b.max_away || 0, h = b.max_hands || 0;
+      document.getElementById('cnt-turn').textContent = t;
+      document.getElementById('cnt-peek').textContent = p;
+      document.getElementById('cnt-away').textContent = a;
+      document.getElementById('cnt-hand').textContent = h;
+      document.getElementById('bar-turn').style.width = Math.min(100, (t / THRESH.turn) * 100) + '%';
+      document.getElementById('bar-peek').style.width = Math.min(100, (p / THRESH.peek) * 100) + '%';
+      document.getElementById('bar-away').style.width = Math.min(100, (a / THRESH.away) * 100) + '%';
+      document.getElementById('bar-hand').style.width = Math.min(100, (h / THRESH.hand) * 100) + '%';
+      document.getElementById('bc-turn').classList.toggle('hot', t >= THRESH.turn);
+      document.getElementById('bc-peek').classList.toggle('hot', p >= THRESH.peek);
+      document.getElementById('bc-away').classList.toggle('hot', a >= THRESH.away);
+      document.getElementById('bc-hand').classList.toggle('hot', h >= THRESH.hand);
+      const breach = t >= THRESH.turn || p >= THRESH.peek || a >= THRESH.away || h >= THRESH.hand;
+      document.getElementById('warn-banner').classList.toggle('show', breach);
+      if (breach) {
+        const pts = [];
+        if (t >= THRESH.turn) pts.push(`${t} head turns`);
+        if (p >= THRESH.peek) pts.push(`${p} peeks`);
+        if (a >= THRESH.away) pts.push(`${a} look-aways`);
+        if (h >= THRESH.hand) pts.push(`${h} hand signals`);
+        document.getElementById('warn-sub').textContent = pts.join(' · ');
+      }
+      const aa = document.getElementById('act-alerts');
+      const acts = b.active_alerts || [];
+      aa.innerHTML = acts.length
+        ? [...new Set(acts)].map(x => `<span class="abadge">${x}</span>`).join('')
+        : '<span style="font-size:11px;color:var(--faint);font-style:italic">None</span>';
+
+      const ao = document.getElementById('act-objects');
+      const objs = window.lastDetectedObjects || {};
+      const objNames = Object.keys(objs);
+      ao.innerHTML = objNames.length
+        ? objNames.map(n => `<span class="abadge" style="background:var(--blue-lt);color:var(--blue);border-color:var(--blue-mid)">${n} (${Math.round(objs[n] * 100)}%)</span>`).join('')
+        : '<span style="font-size:11px;color:var(--faint);font-style:italic">None</span>';
+
+      document.getElementById('person-count').textContent = (b.person_count || 0) + ' person' + ((b.person_count || 0) === 1 ? '' : 's');
+      const lg = document.getElementById('alog');
+      const logs = b.alert_log || [];
+      lg.innerHTML = logs.length
+        ? [...logs].reverse().slice(0, 25).map(e => `
+            <div class="aentry">
+              <span class="atime">${e.time}</span>
+              <span class="aperson">${e.person}</span>
+              <span class="amsg">${e.type}${e.repeat > 1 ? `<span class="arepeat">x${e.repeat}</span>` : ''}</span>
+              <span class="acnt">${e.count}</span>
+            </div>
+          `).join('')
+        : '<div class="aempty">No alerts yet</div>';
+    }
+
+    setInterval(() => {
+      fetch('/status').then(r => r.json()).then(d => {
+        document.getElementById('st-fps').textContent = d.fps.toFixed(1);
+        document.getElementById('st-ifps').textContent = d.inference_fps.toFixed(1);
+        document.getElementById('fps-label').textContent = `Cam ${d.fps.toFixed(1)} · AI ${d.inference_fps.toFixed(1)}`;
+        document.getElementById('st-burst').textContent = (d.num_images && d.num_images > 0) ? (d.burst + '/' + d.num_images) : String(d.burst);
+        document.getElementById('st-total').textContent = d.total;
+        document.getElementById('st-faces').textContent = d.trained_persons;
+        setPill(d.mode);
+        window.lastDetectedObjects = d.objects; // Store for updateBehavior
+        if (burstTarget > 0) document.getElementById('burst-fill').style.width = Math.min(100, Math.round((d.burst / burstTarget) * 100)) + '%';
+        if (d.mode === 'training' || d.train_status) {
+          document.getElementById('train-status').textContent = d.train_status || '';
+          const pct = trainTarget > 0 ? Math.min(100, Math.round((d.train_collected / trainTarget) * 100)) : 0;
+          document.getElementById('progress-fill').style.width = pct + '%';
+          document.getElementById('prog-pct').textContent = pct + '%';
+        }
+        if (d.train_status && d.train_status.startsWith('OK')) { document.getElementById('btn-train').disabled = false; refreshPersonList(); }
+        setBadge(d.model_ready);
+        if (d.burst > 0 && prevBurst === 0) document.getElementById('det-alert-sub').textContent = 'Capturing...';
+        prevBurst = d.burst;
+        if (d.mode === 'idle') {
+          document.getElementById('cam-rec').classList.remove('show');
+          if (d.burst === 0 && burstTarget > 0 && prevBurst === burstTarget) document.getElementById('det-alert-sub').textContent = '\u2713 Complete';
+        }
+      }).catch(() => { });
+    }, 500);
+
+    setInterval(() => {
+      fetch('/behavior_status').then(r => r.json()).then(updateBehavior).catch(() => { });
+    }, 700);
+  </script>
+</body>
+
+</html>

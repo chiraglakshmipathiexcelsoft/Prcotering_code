@@ -1,0 +1,14 @@
+# AI Models
+ultralytics
+insightface
+#onnxruntime-gpu
+
+# Web UI & Logic
+flask
+opencv-python
+numpy
+pillow
+
+# Utils
+pandas
+tk
