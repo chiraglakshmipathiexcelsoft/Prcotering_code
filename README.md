@@ -23,7 +23,9 @@ print(f"GPU Name: {torch.cuda.get_device_name(0)}")
 # Test GPU
 x = torch.randn(1000, 1000).cuda()
 y = torch.matmul(x, x.t())
+```
 print("GPU Test: PASSED")
+```
 
 
 
